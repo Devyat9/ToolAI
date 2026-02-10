@@ -1,0 +1,60 @@
+id: commandcenter-rx-default-creds
+
+info:
+  name: Command Center RX - Default Credentials
+  author: IA
+  severity: critical
+  description: |
+    Command Center RX web interface vulnerable to default credentials (Admin/Admin).
+    Successful authentication is detected by the presence of multiple session cookies.
+  reference:
+    - https://www.example.com/commandcenter
+  tags: default-login,commandcenter,printer,ricoh
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+    cvss-score: 9.8
+    cwe-id: CWE-798
+
+http:
+  - raw:
+      - |
+        POST /startwlm/login.cgi HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/x-www-form-urlencoded
+        Origin: {{BaseURL}}
+        Referer: {{BaseURL}}/startwlm/Start_Wlm.htm
+        User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+        Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8
+        Accept-Language: en-US,en;q=0.9
+        Accept-Encoding: gzip, deflate
+        Cookie: rtl=0
+        Connection: close
+
+        failhtmfile=%2Fstartwlm%2FStart_Wlm.htm&okhtmfile=%2Fstartwlm%2FStart_Wlm.htm&func=authLogin&hidden=&arg03_LoginType=1&arg04_LoginFrom=_wlm_login&language=..%2Fwlmdeu%2Findex.htm&hiddRefreshDevice=..%2Fstartwlm%2FHme_DvcSts.htm&hiddRefreshPanelUsed=..%2Fstartwlm%2FHme_PnlUsg.htm&hiddRefreshPaperid=..%2Fstartwlm%2FHme_Paper.htm&hiddRefreshTonerid=..%2Fstartwlm%2FHme_StplPnch.htm&hiddRefreshStapleid=..%2Fstartwlm%2FHme_Toner.htm&hiddnBackNavIndx=1&hiddRefreshDeviceBack=&hiddRefreshPanelUsedBack=&hiddRefreshPaperidBack=&hiddRefreshToneridBack=&hiddRefreshStapleidBack=&hiddCompatibility=&hiddPasswordToOpenChk=&hiddPasswordToOpen=&hiddRePasswordToOpen=&hiddPasswordToEditChk=&hiddPasswordToEdit=&hiddRePasswordToEdit=&hiddPrinting=&hiddChanges=&hiddCopyingOfText=&hiddEmaiSID=&hiddEmaiName=&hiddECM=&hiddDocID=&privid=&publicid=&attrtype=&attrname=&hiddFolderType=&hiddFolderSMBType=&hiddFolderFTPType=&hiddSMBNumber1=&hiddSMBNumber2=&hiddSMBNumber3=&hiddSMBNumber4=&hiddSMBNumber5=&hiddSMBNumber6=&hiddSMBNumber7=&hiddFTPNumber1=&hiddFTPNumber2=&hiddFTPNumber3=&hiddFTPNumber4=&hiddFTPNumber5=&hiddFTPNumber6=&hiddFTPNumber7=&hiddFAXAddress1=&hiddFAXAddress2=&hiddFAXAddress3=&hiddFAXAddress4=&hiddFAXAddress5=&hiddFAXAddress6=&hiddFAXAddress7=&hiddFAXAddress8=&hiddFAXAddress9=&hiddFAXAddress10=&hiddIFaxAdd=&hiddIFaxViaServer=&hiddIFaxConnMode=&hiddIFaxResolution=&hiddIFaxResolution1=&hiddIFaxResolution2=&hiddIFaxResolution3=&hiddIFaxResolution4=&hiddIFaxResolution5=&hiddIFaxComplession=&hiddIFaxPaperSize=&hiddIFaxPaperSize1=&hiddIFaxPaperSize2=&hiddIFaxPaperSize3=&hiddImage=&hiddTest=&hiddDoc_Num=&hiddCopy=&hiddDocument=&hiddDocRec=&AddressNumberPersonal=&AddressNumberGroup=&hiddPersonAddressID=&hiddGroupAddressID=&hiddPrnBasic=&hiddPageName=&hiddDwnLoadType=&hiddPrintType=&hiddSend1=&hiddSend2=&hiddSend3=&hiddSend4=&hiddSend5=&hiddAddrBokBackUrl=&hiddAddrBokNumber=&hiddAddrBokName=&hiddAddrBokFname=&hiddSendFileName=&hiddenAddressbook=&hiddenAddressbook1=&hiddSendDoc_Num=&hiddSendColor=&hiddSendAddInfo=&hiddSendFileFormat=&hiddMoveConfScn=&hiddRefreshDevice=..%2Fstartwlm%2FHme_DvcSts.htm&hiddRefreshPanelUsed=..%2Fstartwlm%2FHme_PnlUsg.htm&hiddRefreshPaperid=..%2Fstartwlm%2FHme_Paper.htm&hiddRefreshTonerid=..%2Fstartwlm%2FHme_StplPnch.htm&hiddRefreshStapleid=..%2Fstartwlm%2FHme_Toner.htm&hiddnBackNavIndx=0&hiddRefreshDeviceBack=&hiddRefreshPanelUsedBack=&hiddRefreshPaperidBack=&hiddRefreshToneridBack=&hiddRefreshStapleidBack=&hiddValue=&arg01_UserName=Admin&arg02_Password=Admin&arg05_AccountId=&Login=Login&arg06_DomainName=&hndHeight=0
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Set-Cookie: cert_id="
+          - "Set-Cookie: type="
+          - "Set-Cookie: level="
+        condition: or
+
+      - type: word
+        part: header
+        words:
+          - "Set-Cookie"
+
+      - type: status
+        status:
+          - 200
+          - 302
+
+    extractors:
+      - type: kval
+        part: header
+        kval:
+          - set_cookie
+
